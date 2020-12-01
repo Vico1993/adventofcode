@@ -10,7 +10,7 @@ import (
 var (
 	target int64 = 2020
 	input  []string
-	result []int64
+	ref    int64
 )
 
 func main() {
@@ -24,11 +24,11 @@ func main() {
 	input = strings.Split(string(b), "\n")
 
 	for _, val := range input {
-		result = result[:0]
 		val := transformStringIntoInt(val)
-		result = append(result, val)
+		ref = val
+		result := is2020Possible(val, false)
 
-		if is2020Possible(val, false) {
+		if result > 0 {
 			fmt.Println("Result:")
 			fmt.Println(result)
 
@@ -46,24 +46,28 @@ func transformStringIntoInt(val string) int64 {
 	return integer
 }
 
-func is2020Possible(val int64, stop bool) bool {
+func is2020Possible(val int64, stop bool) int64 {
+	result := ref
 	for _, value := range input {
 		valueAsInt := transformStringIntoInt(value)
-
-		if len(result) == 2 && !stop {
-			result[len(result)-1] = valueAsInt
-		} else if len(result) == 3 {
-			result[len(result)-1] = valueAsInt
-		} else {
-			result = append(result, valueAsInt)
-		}
+		result = ref * valueAsInt
 
 		cal := val + valueAsInt
 
-		if (cal < target && !stop && is2020Possible(cal, true)) || cal == target {
-			return true
+		if cal < target && !stop {
+			ref = result
+
+			if res := is2020Possible(cal, true); res > 0 {
+				return res
+			}
+
+			ref = result / valueAsInt
+		}
+
+		if cal == target {
+			return result
 		}
 	}
 
-	return false
+	return 0
 }
