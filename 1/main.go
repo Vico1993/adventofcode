@@ -7,7 +7,11 @@ import (
 	"strings"
 )
 
-const some = 2020
+var (
+	target int64 = 2020
+	input  []string
+	result []int64
+)
 
 func main() {
 	// Read file
@@ -17,14 +21,17 @@ func main() {
 	}
 
 	// Convert bytes into proper collection
-	var input []string
 	input = strings.Split(string(b), "\n")
 
 	for _, val := range input {
+		result = result[:0]
 		val := transformStringIntoInt(val)
-		res, secondVal := is2020Possible(val, input)
-		if res {
-			fmt.Println(fmt.Sprintf("Result is %d", (val * secondVal)))
+		result = append(result, val)
+
+		if is2020Possible(val, false) {
+			fmt.Println("Result:")
+			fmt.Println(result)
+
 			break
 		}
 	}
@@ -39,13 +46,24 @@ func transformStringIntoInt(val string) int64 {
 	return integer
 }
 
-func is2020Possible(val int64, input []string) (bool, int64) {
+func is2020Possible(val int64, stop bool) bool {
 	for _, value := range input {
 		valueAsInt := transformStringIntoInt(value)
-		if val+valueAsInt == some {
-			return true, valueAsInt
+
+		if len(result) == 2 && !stop {
+			result[len(result)-1] = valueAsInt
+		} else if len(result) == 3 {
+			result[len(result)-1] = valueAsInt
+		} else {
+			result = append(result, valueAsInt)
+		}
+
+		cal := val + valueAsInt
+
+		if (cal < target && !stop && is2020Possible(cal, true)) || cal == target {
+			return true
 		}
 	}
 
-	return false, 0
+	return false
 }
